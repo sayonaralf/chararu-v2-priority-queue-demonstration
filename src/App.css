@@ -1,0 +1,24 @@
+.app {
+  height: 100vh;
+  position: relative;
+}
+.app-bg {
+  width: 1200px;
+  height: 500px;
+}
+
+.container {
+  width: 1110px;
+  height: 350px;
+  position: absolute;
+  background-color: rgba(0,0,0,0.2);
+  left: 42px;
+  top: 83px;
+}
+.item {
+  width: 66px;
+  height: 20px;
+  transition: all 1s ease;
+  border: 1px solid #000;
+  position: absolute;
+}
