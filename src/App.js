@@ -19,42 +19,52 @@ const QUEUE_POSITION_MAP = {
     left: 0,
     top: 0,
     numPreLine: 7,
+    leftUnit: 68,
+    topUnit: 22,
   },
   HIGH_ONGOING_QUEUE: {
     left: 634,
     top: 0,
-    numPreLine: 5,
+    numPreLine: 7,
+    leftUnit: 68,
+    // leftUnit: 98,
+    topUnit: 22,
   },
   LOW_WAIT_QUEUE: {
     left: 0,
     top: 228,
     numPreLine: 7,
+    leftUnit: 68,
+    topUnit: 22,
   },
   LOW_ONGOING_QUEUE: {
     left: 634,
     top: 228,
-    numPreLine: 5,
+    numPreLine: 7,
+    leftUnit: 68,
+    // leftUnit: 98,
+    topUnit: 22,
   },
 }
 
 const highWaitQueue = []
-const highOngoingQueue = []
+let highOngoingQueue = []
 const lowWaitQueue = []
-const lowOngoingQueue = []
+let lowOngoingQueue = []
 
 
 function refreshPositionList() {
   function getPosition(type, index) {
     return {
-      left: (index % QUEUE_POSITION_MAP[type].numPreLine) * 68 + QUEUE_POSITION_MAP[type].left,
-      top: Math.floor(index / QUEUE_POSITION_MAP[type].numPreLine) * 22 + QUEUE_POSITION_MAP[type].top,
+      left: (index % QUEUE_POSITION_MAP[type].numPreLine) * QUEUE_POSITION_MAP[type].leftUnit + QUEUE_POSITION_MAP[type].left,
+      top: Math.floor(index / QUEUE_POSITION_MAP[type].numPreLine) * QUEUE_POSITION_MAP[type].topUnit + QUEUE_POSITION_MAP[type].top,
     }
   }
   const positionList = [
-    ...highWaitQueue.map((item, index) => ({...item, ...getPosition(HIGH_WAIT_QUEUE, index)})),
-    ...highOngoingQueue.map((item, index) => ({...item, ...getPosition(HIGH_ONGOING_QUEUE, index)})),
-    ...lowWaitQueue.map((item, index) => ({...item, ...getPosition(LOW_WAIT_QUEUE, index)})),
-    ...lowOngoingQueue.map((item, index) => ({...item, ...getPosition(LOW_ONGOING_QUEUE, index)})),
+    ...highWaitQueue.map((item, index) => ({type: 'wait', ...item, ...getPosition(HIGH_WAIT_QUEUE, index)})),
+    ...highOngoingQueue.map((item, index) => ({type: 'ongoing', ...item, ...getPosition(HIGH_ONGOING_QUEUE, index)})),
+    ...lowWaitQueue.map((item, index) => ({type: 'wait', ...item, ...getPosition(LOW_WAIT_QUEUE, index)})),
+    ...lowOngoingQueue.map((item, index) => ({type: 'ongoing', ...item, ...getPosition(LOW_ONGOING_QUEUE, index)})),
   ]
   return positionList
 }
@@ -71,27 +81,12 @@ function randomInt(min, max) {
 }
 
 function randomNumber(min, max) {
-    return (Math.random() * (max - min) + min).toFixed(2);
+    return parseFloat((Math.random() * (max - min) + min).toFixed(2));
 }
 
 function App() {
   const [data, setData] = useState([])
 
-  // const generateTransHandle = (from, to) => () => {
-  //   const indexMap = data.typeCount
-  //   const list = data.list.filter(i => i.queueFrom === from)
-  //   list.sort((a, b) => a.renderIndex - b.renderIndex)
-  //   for (let i = 0; i < list.length; i++) {
-  //     if (list[i].queueFrom === from) {
-  //       const queueIndex = queue.findIndex(item => item.id === list[i].id)
-  //       queue[queueIndex].queueFrom = to
-  //       queue[queueIndex].nextRenderIndex = indexMap[to]
-  //       queue[queueIndex].renderOffset = 0
-  //       setData(generatePosition(from))
-  //       return
-  //     }
-  //   }
-  // }
 
   const OneTurnChatHandle = () => {
     function calc_high_threads_occupied_num(high_threads_num, high_threads_reserved_num, high_ongoing_num) {
@@ -106,21 +101,35 @@ function App() {
         return high_threads_occupied_num
     }
     function restore_item() {
-        console.log("high_ongoing_queue", JSON.stringify(highOngoingQueue))
-        console.log("low_ongoing_queue", JSON.stringify(lowOngoingQueue))
-        
+        let minLatencyOfHigh = Math.min(...highOngoingQueue.map(item => item.latency))
+        let minLatencyOfLow = Math.min(...lowOngoingQueue.map(item => item.latency))
+        if (minLatencyOfHigh > minLatencyOfLow) {
+          let lowIndex = lowOngoingQueue.findIndex((item) => item.latency === minLatencyOfLow)
+          let deleted = lowOngoingQueue.splice(lowIndex, 1)[0]
+          lowOngoingQueue = lowOngoingQueue.map(item => ({...item, latency: item.latency - minLatencyOfLow}))
+          highOngoingQueue = highOngoingQueue.map(item => ({...item, latency: item.latency - minLatencyOfLow}))
+          if (deleted.turns > 1) {
+            lowWaitQueue.push({id: deleted.id, turns: deleted.turns - 1})
+          }
+        } else {
+          let highIndex = highOngoingQueue.findIndex((item) => item.latency === minLatencyOfHigh)
+          let deleted = highOngoingQueue.splice(highIndex, 1)[0]
+          if (deleted.turns > 1) {
+            highWaitQueue.push({id: deleted.id, turns: deleted.turns - 1})
+          }
+          lowOngoingQueue = lowOngoingQueue.map(item => ({...item, latency: item.latency - minLatencyOfHigh}))
+          highOngoingQueue = highOngoingQueue.map(item => ({...item, latency: item.latency - minLatencyOfHigh}))
+        }
     }
 
-    if (highWaitQueue.length > 0 && highOngoingQueue.length < HIGH_THREADS_NUM + LOW_THREADS_NUM - Math.max(LOW_THREADS_RESERVED_NUM, highOngoingQueue.length)) {
-        let item = highWaitQueue.pop();
+    if (highWaitQueue.length > 0 && highOngoingQueue.length < HIGH_THREADS_NUM + LOW_THREADS_NUM - Math.max(LOW_THREADS_RESERVED_NUM, lowOngoingQueue.length)) {
+        let item = highWaitQueue.shift();
         item['latency'] = randomNumber(2, 10)
         highOngoingQueue.push(item);
-        // refresh_display();
     } else if(lowWaitQueue.length > 0 && lowOngoingQueue.length < HIGH_THREADS_NUM + LOW_THREADS_NUM - calc_high_threads_occupied_num(HIGH_THREADS_NUM, HIGH_THREADS_RESERVED_NUM, highOngoingQueue.length)) {
-        let item = lowWaitQueue.pop();
+        let item = lowWaitQueue.shift();
         item['latency'] = randomNumber(2, 10)
         lowOngoingQueue.push(item);
-        // refresh_display();
     } else {
         restore_item()
     }
@@ -128,13 +137,15 @@ function App() {
 }
 
   const newOneHandle = (queue) => {
-    queue.push({
+    queue.unshift({
       id: getGid(),
       turns: randomInt(2, 9),
     })
     setData(refreshPositionList())
   }
 
+
+  // console.log('data', data)
   return (
     <div className='app'>
       <img className='app-bg' src={logo} alt='' />
@@ -142,7 +153,8 @@ function App() {
         {data
         .sort((a, b) => a.id.localeCompare(b.id))
         .map((item) => {
-          // const { left, top } = QUEUE_POSITION_MAP[item.queueFrom]
+          // let className = item.type === 'wait' ? 'item-wait' : 'item-ongoing'
+          // let className = 'item'
           return (
             <div
               className='item'
@@ -153,6 +165,7 @@ function App() {
               }}
             >
               {item.id} ({item.turns})
+              {/* {item.id} ({item.turns}){item.type === 'wait' ? '' : '[' + item.latency + ']'} */}
             </div>
           )
         })}
@@ -162,6 +175,12 @@ function App() {
         <button onClick={() => newOneHandle(highWaitQueue)}>HighWaitQueue Enqueue</button>
         <button onClick={() => newOneHandle(lowWaitQueue)}>LowWaitQueue Enqueue</button>
         <button onClick={() => OneTurnChatHandle()}>One Turn Chat Step</button>
+      </div>
+      <div>
+        <h1>HIGH_THREADS_NUM: {HIGH_THREADS_NUM}</h1>
+        <h1>LOW_THREADS_NUM: {LOW_THREADS_NUM}</h1>
+        <h1>HIGH_THREADS_RESERVED_NUM: {HIGH_THREADS_RESERVED_NUM}</h1>
+        <h1>LOW_THREADS_RESERVED_NUM: {LOW_THREADS_RESERVED_NUM}</h1>
       </div>
     </div>
   )

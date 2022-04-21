@@ -15,6 +15,21 @@
   left: 42px;
   top: 83px;
 }
+/* .item-wait {
+  width: 66px;
+  height: 20px;
+  transition: all 1s ease;
+  border: 1px solid #000;
+  position: absolute;
+}
+.item-ongoing {
+  width: 95px;
+  height: 20px;
+  transition: all 1s ease;
+  border: 1px solid #000;
+  position: absolute;
+} */
+
 .item {
   width: 66px;
   height: 20px;
