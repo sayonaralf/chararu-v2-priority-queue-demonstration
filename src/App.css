@@ -15,20 +15,28 @@
   left: 42px;
   top: 83px;
 }
-/* .item-wait {
+.item-wait {
   width: 66px;
   height: 20px;
   transition: all 1s ease;
-  border: 1px solid #000;
+  border: 2px solid #000;
   position: absolute;
 }
 .item-ongoing {
-  width: 95px;
-  height: 20px;
+  width: 66px;
+  height: 40px;
   transition: all 1s ease;
-  border: 1px solid #000;
+  border: 2px solid #000;
   position: absolute;
-} */
+}
+
+.latency {
+  color: blue;
+}
+
+.latency-min {
+  color: red;
+}
 
 .item {
   width: 66px;
