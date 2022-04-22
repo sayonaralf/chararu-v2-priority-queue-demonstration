@@ -27,8 +27,7 @@ const QUEUE_POSITION_MAP = {
     top: 0,
     numPreLine: 7,
     leftUnit: 68,
-    // leftUnit: 98,
-    topUnit: 22,
+    topUnit: 44,
   },
   LOW_WAIT_QUEUE: {
     left: 0,
@@ -42,8 +41,7 @@ const QUEUE_POSITION_MAP = {
     top: 228,
     numPreLine: 7,
     leftUnit: 68,
-    // leftUnit: 98,
-    topUnit: 22,
+    topUnit: 44,
   },
 }
 
@@ -66,7 +64,9 @@ function refreshPositionList() {
     ...lowWaitQueue.map((item, index) => ({type: 'wait', ...item, ...getPosition(LOW_WAIT_QUEUE, index)})),
     ...lowOngoingQueue.map((item, index) => ({type: 'ongoing', ...item, ...getPosition(LOW_ONGOING_QUEUE, index)})),
   ]
-  return positionList
+  let minLatencyOfHigh = highOngoingQueue.length > 0 ? Math.min(...highOngoingQueue.map(item => item.latency)) : -1
+  let minLatencyOfLow = lowOngoingQueue.length > 0 ? Math.min(...lowOngoingQueue.map(item => item.latency)) : -1
+  return { positionList, minLantency: minLatencyOfHigh > minLatencyOfLow ? minLatencyOfLow : minLatencyOfHigh}
 }
 
 function getGid() {
@@ -84,8 +84,12 @@ function randomNumber(min, max) {
     return parseFloat((Math.random() * (max - min) + min).toFixed(2));
 }
 
+function sub(a, b) {
+  return parseFloat((a - b).toFixed(2))
+}
+
 function App() {
-  const [data, setData] = useState([])
+  const [data, setData] = useState({positionList: [], minLantency: 0})
 
 
   const OneTurnChatHandle = () => {
@@ -106,8 +110,8 @@ function App() {
         if (minLatencyOfHigh > minLatencyOfLow) {
           let lowIndex = lowOngoingQueue.findIndex((item) => item.latency === minLatencyOfLow)
           let deleted = lowOngoingQueue.splice(lowIndex, 1)[0]
-          lowOngoingQueue = lowOngoingQueue.map(item => ({...item, latency: item.latency - minLatencyOfLow}))
-          highOngoingQueue = highOngoingQueue.map(item => ({...item, latency: item.latency - minLatencyOfLow}))
+          lowOngoingQueue = lowOngoingQueue.map(item => ({...item, latency: sub(item.latency ,minLatencyOfLow)}))
+          highOngoingQueue = highOngoingQueue.map(item => ({...item, latency: sub(item.latency ,minLatencyOfLow)}))
           if (deleted.turns > 1) {
             lowWaitQueue.push({id: deleted.id, turns: deleted.turns - 1})
           }
@@ -117,8 +121,8 @@ function App() {
           if (deleted.turns > 1) {
             highWaitQueue.push({id: deleted.id, turns: deleted.turns - 1})
           }
-          lowOngoingQueue = lowOngoingQueue.map(item => ({...item, latency: item.latency - minLatencyOfHigh}))
-          highOngoingQueue = highOngoingQueue.map(item => ({...item, latency: item.latency - minLatencyOfHigh}))
+          lowOngoingQueue = lowOngoingQueue.map(item => ({...item, latency: sub(item.latency, minLatencyOfHigh)}))
+          highOngoingQueue = highOngoingQueue.map(item => ({...item, latency: sub(item.latency ,minLatencyOfHigh)}))
         }
     }
 
@@ -150,22 +154,20 @@ function App() {
     <div className='app'>
       <img className='app-bg' src={logo} alt='' />
       <div className='container'>
-        {data
+        {data.positionList
         .sort((a, b) => a.id.localeCompare(b.id))
         .map((item) => {
-          // let className = item.type === 'wait' ? 'item-wait' : 'item-ongoing'
-          // let className = 'item'
+          let className = item.type === 'wait' ? 'item-wait' : 'item-ongoing'
           return (
             <div
-              className='item'
+              className={className}
               key={item.id}
               style={{
                 left: item.left,
                 top: item.top,
               }}
             >
-              {item.id} ({item.turns})
-              {/* {item.id} ({item.turns}){item.type === 'wait' ? '' : '[' + item.latency + ']'} */}
+              {item.id} ({item.turns})<span className={item.latency === data.minLantency ? 'latency-min' : 'latency'}>{item.type === 'wait' ? '' : '[' + item.latency + ']'}</span>
             </div>
           )
         })}
