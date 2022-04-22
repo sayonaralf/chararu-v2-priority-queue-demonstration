@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/chararu-v2-priority-queue-demonstration/static/css/main.5ccac64f.css",
-    "main.js": "/chararu-v2-priority-queue-demonstration/static/js/main.6db88605.js",
+    "main.css": "/chararu-v2-priority-queue-demonstration/static/css/main.6172e514.css",
+    "main.js": "/chararu-v2-priority-queue-demonstration/static/js/main.5c7f0e21.js",
     "static/js/787.0d81560a.chunk.js": "/chararu-v2-priority-queue-demonstration/static/js/787.0d81560a.chunk.js",
     "static/media/bg.svg": "/chararu-v2-priority-queue-demonstration/static/media/bg.bd568ea884af21fac6e863a1a3f63068.svg",
     "index.html": "/chararu-v2-priority-queue-demonstration/index.html",
-    "main.5ccac64f.css.map": "/chararu-v2-priority-queue-demonstration/static/css/main.5ccac64f.css.map",
-    "main.6db88605.js.map": "/chararu-v2-priority-queue-demonstration/static/js/main.6db88605.js.map",
+    "main.6172e514.css.map": "/chararu-v2-priority-queue-demonstration/static/css/main.6172e514.css.map",
+    "main.5c7f0e21.js.map": "/chararu-v2-priority-queue-demonstration/static/js/main.5c7f0e21.js.map",
     "787.0d81560a.chunk.js.map": "/chararu-v2-priority-queue-demonstration/static/js/787.0d81560a.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.5ccac64f.css",
-    "static/js/main.6db88605.js"
+    "static/css/main.6172e514.css",
+    "static/js/main.5c7f0e21.js"
   ]
 }
