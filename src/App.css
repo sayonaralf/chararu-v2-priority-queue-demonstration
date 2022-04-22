@@ -38,10 +38,26 @@
   color: red;
 }
 
-.item {
-  width: 66px;
-  height: 20px;
-  transition: all 1s ease;
-  border: 1px solid #000;
+#high-wait-queue {
+  left: 160px;
+  top: 170px;
+  position: absolute;
+}
+
+#high-ongoing-queue {
+  left: 760px;
+  top: 170px;
+  position: absolute;
+}
+
+#low-wait-queue {
+  left: 160px;
+  top: 260px;
+  position: absolute;
+}
+
+#low-ongoing-queue {
+  left: 760px;
+  top: 260px;
   position: absolute;
 }

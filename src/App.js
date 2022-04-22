@@ -178,11 +178,15 @@ function App() {
         <button onClick={() => newOneHandle(lowWaitQueue)}>LowWaitQueue Enqueue</button>
         <button onClick={() => OneTurnChatHandle()}>One Turn Chat Step</button>
       </div>
+      <h2 id="high-wait-queue">High Wait Queue</h2>
+      <h2 id="high-ongoing-queue">High Ongoing Queue</h2>
+      <h2 id="low-wait-queue">Low Wait Queue</h2>
+      <h2 id="low-ongoing-queue">Low Ongoing Queue</h2>
       <div>
-        <h1>HIGH_THREADS_NUM: {HIGH_THREADS_NUM}</h1>
-        <h1>LOW_THREADS_NUM: {LOW_THREADS_NUM}</h1>
-        <h1>HIGH_THREADS_RESERVED_NUM: {HIGH_THREADS_RESERVED_NUM}</h1>
-        <h1>LOW_THREADS_RESERVED_NUM: {LOW_THREADS_RESERVED_NUM}</h1>
+        <h2>HIGH_THREADS_NUM: {HIGH_THREADS_NUM}</h2>
+        <h2>LOW_THREADS_NUM: {LOW_THREADS_NUM}</h2>
+        <h2>HIGH_THREADS_RESERVED_NUM: {HIGH_THREADS_RESERVED_NUM}</h2>
+        <h2>LOW_THREADS_RESERVED_NUM: {LOW_THREADS_RESERVED_NUM}</h2>
       </div>
     </div>
   )
